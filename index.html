@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Constellation Sketchpad</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page">
+    <main class="canvas-wrap">
+      <div class="canvas-frame">
+        <canvas id="sky" aria-label="Star map canvas"></canvas>
+        <div id="hover-label" class="hover-label" hidden></div>
+        <div class="status">
+          <span id="selection-status">No star selected</span>
+          <span class="hint">Left click to connect · Right click to deselect</span>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control-row">
+          <label for="mag-limit">Hide stars above magnitude <span id="mag-limit-value">3.5</span></label>
+          <input id="mag-limit" type="range" min="-1" max="8" step="0.1" value="3.5" />
+          <button id="clear-lines" type="button">Clear lines</button>
+          <button id="save-image" type="button" class="primary">Save as image</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="save-modal" hidden>
+    <div class="modal">
+      <h2>Name your constellation</h2>
+      <form id="save-form">
+        <input id="constellation-name" name="constellation-name" type="text" placeholder="My constellation" />
+        <div class="modal-actions">
+          <button type="button" id="cancel-save">Cancel</button>
+          <button type="submit" class="primary">Save image</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
