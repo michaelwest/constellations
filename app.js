@@ -338,6 +338,10 @@ function closeSaveModal() {
   saveModal.hidden = true;
 }
 
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent || "");
+}
+
 function downloadImage(title) {
   // Ensure latest render
   draw();
@@ -360,9 +364,23 @@ function downloadImage(title) {
     exportCtx.restore();
   }
 
+  const dataUrl = exportCanvas.toDataURL("image/png");
+
+  // iOS Safari doesn't honor download attribute on data URLs; open in a new tab instead
+  if (isIOS()) {
+    const win = window.open();
+    if (win) {
+      win.document.write(`<img src="${dataUrl}" style="width:100%;height:auto;">`);
+    } else {
+      // fallback: set location
+      window.location.href = dataUrl;
+    }
+    return;
+  }
+
   const link = document.createElement("a");
   link.download = `${title ? title.replace(/\\s+/g, "-").toLowerCase() : "constellation"}.png`;
-  link.href = exportCanvas.toDataURL("image/png");
+  link.href = dataUrl;
   link.click();
 }
 
