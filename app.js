@@ -17,7 +17,6 @@ const highlightStars = new Map([
 
 const canvas = document.getElementById("sky");
 const clearLinesButton = document.getElementById("clear-lines");
-const selectionStatus = document.getElementById("selection-status");
 const magnitudeSlider = document.getElementById("mag-limit");
 const magnitudeValue = document.getElementById("mag-limit-value");
 const saveButton = document.getElementById("save-image");
@@ -120,7 +119,6 @@ function normalizeStar(entry, index) {
 }
 
 async function loadBrightStars() {
-  selectionStatus.textContent = "Loading stars...";
   try {
     const response = await fetch("./bsc5-short.json");
     const catalog = await response.json();
@@ -130,11 +128,9 @@ async function loadBrightStars() {
     allStars.splice(0, allStars.length, ...parsed);
     selectedStar = null;
     lines.length = 0;
-    selectionStatus.textContent = "Loaded star catalog";
     applyMagnitudeFilter();
   } catch (error) {
     console.error("Failed to load star catalog", error);
-    selectionStatus.textContent = "Could not load stars";
   }
 }
 
@@ -215,12 +211,7 @@ function drawStars() {
 }
 
 function drawSelection() {
-  if (!selectedStar) {
-    selectionStatus.textContent = visibleStars.length ? "No star selected" : "Loading stars...";
-    return;
-  }
-
-  selectionStatus.innerHTML = `Selected: <strong>${selectionLabel(selectedStar)}</strong>`;
+  if (!selectedStar) return;
 
   const x = selectedStar.x * renderWidth;
   const y = selectedStar.y * renderHeight;
@@ -283,24 +274,23 @@ function handleMouseLeave() {
 
 function handleContextMenu(event) {
   event.preventDefault();
-  if (!selectedStar) return;
-  selectedStar = null;
-  selectionStatus.textContent = "No star selected";
-  draw();
-}
-
-function handleHemisphereChange(event) {
-  currentHemisphere = event.target.value;
-  selectedStar = null;
-  selectionStatus.textContent = hemispheres[currentHemisphere].stars.length
-    ? "No star selected"
-    : "Loading stars...";
+  if (!lines.length) return;
+  const last = lines.pop();
+  const origin = visibleStars.find((s) => s.id === last.from);
+  selectedStar = origin || null;
   draw();
 }
 
 function handleClearLines() {
   lines.length = 0;
   draw();
+}
+
+function handleKeyDown(event) {
+  if (event.key === "Escape") {
+    selectedStar = null;
+    draw();
+  }
 }
 
 function selectionLabel(star) {
@@ -407,6 +397,7 @@ function init() {
   canvas.addEventListener("mousemove", handleMouseMove);
   canvas.addEventListener("mouseleave", handleMouseLeave);
   canvas.addEventListener("contextmenu", handleContextMenu);
+  window.addEventListener("keydown", handleKeyDown);
   clearLinesButton.addEventListener("click", handleClearLines);
   if (magnitudeSlider) {
     magnitudeSlider.addEventListener("input", handleMagnitudeChange);
